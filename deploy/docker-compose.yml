@@ -1,0 +1,40 @@
+# Production stack for the operator dashboard: the Next.js BFF behind Caddy, which obtains and renews TLS certificates itself.
+# Usage (from this folder):  cp .env.production.example .env.production   # fill it in, keep it out of git
+#                            docker compose --env-file .env.production up -d --build
+# The backend (commerce API) is separate; BACKEND_ORIGIN must be its public https origin.
+services:
+  dashboard:
+    build:
+      context: ..
+      dockerfile: Dockerfile
+    restart: unless-stopped
+    env_file: .env.production
+    environment:
+      NODE_ENV: production
+    expose: ["3200"]
+    read_only: true
+    tmpfs: ["/tmp", "/app/.next/cache"]
+    cap_drop: ["ALL"]
+    security_opt: ["no-new-privileges:true"]
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://127.0.0.1:3200/api/health"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+  caddy:
+    image: caddy:2-alpine
+    restart: unless-stopped
+    depends_on:
+      dashboard:
+        condition: service_healthy
+    ports: ["80:80", "443:443"]
+    environment:
+      DASHBOARD_HOST: ${DASHBOARD_HOST:?set DASHBOARD_HOST, e.g. ops.example.com}
+      ACME_EMAIL: ${ACME_EMAIL:?set ACME_EMAIL for certificate expiry notices}
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy_data:/data
+      - caddy_config:/config
+volumes:
+  caddy_data:
+  caddy_config:

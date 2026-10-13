@@ -1,0 +1,3 @@
+export function isSafeNextPath(value: string | null): value is string {
+  return Boolean(value && value.startsWith('/') && !value.startsWith('//') && !value.startsWith('/api/') && !value.startsWith('/login') && !value.startsWith('/invite') && !value.startsWith('/dev/'));
+}

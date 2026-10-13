@@ -1,0 +1,9 @@
+node_modules
+.next
+.dev.log
+test-results
+*.local.*
+.env*
+docs/build/evidence
+tsconfig.tsbuildinfo
+deploy

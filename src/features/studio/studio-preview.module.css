@@ -1,0 +1,8 @@
+.bar { display: flex; flex-wrap: wrap; align-items: end; gap: var(--space-3); }
+.devices { display: inline-flex; gap: var(--space-1); }
+.stage { display: grid; justify-items: center; padding: var(--space-4); border: 1px solid var(--dash-border); border-radius: var(--radius-lg); background: var(--dash-surface-muted); overflow-x: auto; }
+.frame { height: 70vh; min-height: 28rem; max-width: 100%; border: 1px solid var(--dash-border-strong); border-radius: var(--radius-md); background: #fff; }
+.frame[data-device='phone'] { width: 375px; }
+.frame[data-device='tablet'] { width: 768px; }
+.frame[data-device='desktop'] { width: 1280px; }
+.token { overflow-wrap: anywhere; user-select: all; padding: var(--space-2) var(--space-3); border: 1px solid var(--dash-border); border-radius: var(--radius-md); background: var(--dash-surface-muted); font: 600 var(--text-xs)/1.5 ui-monospace, monospace; }

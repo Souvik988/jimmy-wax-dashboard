@@ -1,0 +1,82 @@
+.sheet {
+  width: min(100%, 48rem);
+  margin: auto;
+  padding: 3rem;
+  border: 1px solid var(--dash-border);
+  background: #fffdf9;
+  color: #211914;
+}
+.sheet header {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  border-bottom: 2px solid #211914;
+  padding-bottom: 1.5rem;
+}
+.sheet h1,
+.sheet h2 {
+  font-family: var(--font-display), Georgia, serif;
+}
+.sheet h1 {
+  margin: 0.25rem 0;
+  font-size: 2.25rem;
+}
+.sheet h2 {
+  margin: 1.75rem 0 0.5rem;
+  font-size: 1.25rem;
+}
+.sheet p {
+  line-height: 1.6;
+}
+.sheet table {
+  width: 100%;
+  border-collapse: collapse;
+}
+.sheet th,
+.sheet td {
+  border-bottom: 1px solid #d9cdbd;
+  padding: 0.75rem;
+  text-align: left;
+}
+.sheet th:last-child,
+.sheet td:last-child {
+  text-align: right;
+}
+.sheet footer {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-top: 2rem;
+  padding-top: 1rem;
+  border-top: 2px solid #211914;
+  font-size: 0.875rem;
+  font-weight: 700;
+}
+@media print {
+  :global(.shell-sidebar),
+  :global(.shell-topbar),
+  :global(.store-pause-banner),
+  :global(.shell-idle-warning) {
+    display: none !important;
+  }
+
+  :global(.app-shell) {
+    padding-left: 0 !important;
+  }
+
+  :global(.shell-main) {
+    padding: 0 !important;
+  }
+
+  .print {
+    display: none !important;
+  }
+  .sheet {
+    width: 100%;
+    border: 0;
+    padding: 0;
+  }
+  .sheet header {
+    break-after: avoid;
+  }
+}

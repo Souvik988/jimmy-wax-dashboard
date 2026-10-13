@@ -1,0 +1,24 @@
+{
+	email {$ACME_EMAIL}
+}
+
+{$DASHBOARD_HOST} {
+	encode zstd gzip
+	reverse_proxy dashboard:3200 {
+		health_uri /api/health
+		health_interval 15s
+	}
+	header {
+		Strict-Transport-Security "max-age=31536000; includeSubDomains"
+		X-Content-Type-Options "nosniff"
+		Referrer-Policy "same-origin"
+		-Server
+	}
+	# Operator console: never index it.
+	header /robots.txt Content-Type "text/plain"
+	respond /robots.txt "User-agent: *\nDisallow: /\n" 200
+	log {
+		output stdout
+		format json
+	}
+}

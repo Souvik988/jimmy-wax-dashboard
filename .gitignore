@@ -1,0 +1,31 @@
+# dependencies
+node_modules/
+.pnpm-store/
+
+# build output
+.next/
+out/
+*.tsbuildinfo
+
+# secrets and local configuration: only the example file is tracked
+.env
+.env.*
+!.env.example
+deploy/.env.production
+
+# logs, test output and local runs
+*.log
+.dev.log
+test-results/
+playwright-report/
+
+# Signed-in screenshot sweep (about 50 MB). Regenerate with tests/e2e/responsive-a11y.local.spec.ts; summary.json is kept.
+docs/build/evidence/responsive/*.png
+
+# editor / OS / assistant tooling
+.claude/
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+desktop.ini

@@ -1,0 +1,7 @@
+.switcher { display: inline-flex; padding: 3px; border: 1px solid var(--dash-border-strong); border-radius: 999px; background: var(--dash-surface-muted); }
+.switcher a { min-height: 2.5rem; padding: 0 var(--space-4); border-radius: 999px; color: var(--dash-text); font-size: var(--text-sm); font-weight: 700; line-height: 2.5rem; text-decoration: none; }
+.switcher a[aria-current='page'] { background: var(--dash-accent); color: var(--dash-accent-contrast); }
+.card { display: grid; gap: 4px; padding: var(--space-4); border: 1px solid var(--dash-border); border-radius: var(--radius-md); background: var(--dash-surface); color: var(--dash-text); text-decoration: none; }
+.card small { color: var(--dash-text-muted); font-size: var(--text-xs); }
+.open { display: inline-flex; align-items: center; min-height: 2.75rem; padding: 0 var(--space-3); border: 1px solid var(--dash-border-strong); border-radius: var(--radius-md); color: var(--dash-text); font-size: var(--text-sm); font-weight: 700; text-decoration: none; }
+.sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }

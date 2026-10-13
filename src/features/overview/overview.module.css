@@ -1,0 +1,38 @@
+.workspace { display: grid; max-width: 86rem; gap: var(--space-5); }
+.header { display: flex; align-items: end; justify-content: space-between; gap: var(--space-5); padding-bottom: var(--space-5); border-bottom: 1px solid var(--dash-border); }
+.header h1 { margin: 0; font-family: var(--font-display), Georgia, serif; font-size: clamp(2.25rem, 4vw, 3.5rem); font-weight: 500; letter-spacing: -.05em; }
+.header p:last-child { max-width: 43rem; margin: var(--space-2) 0 0; color: var(--dash-text-muted); line-height: 1.65; }
+.refreshGroup { display: flex; align-items: center; gap: var(--space-3); color: var(--dash-text-faint); font-size: var(--text-xs); white-space: nowrap; }
+.metrics { display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: var(--space-3); }
+.primaryGrid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: var(--space-4); align-items: start; }
+.secondaryGrid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: var(--space-4); align-items: start; }
+.cardDefinition, .cardFootnote { margin: 0; color: var(--dash-text-muted); font-size: var(--text-xs); line-height: 1.55; }
+.cardFootnote { margin-top: var(--space-3); color: var(--dash-text-faint); }
+.salesTotals { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: var(--space-2); margin: var(--space-4) 0; }
+.salesTotals div { min-width: 0; padding: var(--space-3); border-radius: var(--radius-sm); background: var(--dash-surface-muted); }
+.salesTotals span, .storeStates span { display: block; color: var(--dash-text-muted); font-size: .65rem; font-weight: 800; letter-spacing: .05em; text-transform: uppercase; }
+.salesTotals strong { display: block; margin-top: .35rem; font-size: var(--text-sm); font-variant-numeric: tabular-nums; }
+.sparkline { display: flex; height: 5.5rem; align-items: end; gap: 3px; padding: var(--space-2) 0; border-bottom: 1px solid var(--dash-border); }
+.sparkline i { display: block; min-width: 3px; flex: 1; border-radius: 2px 2px 0 0; background: color-mix(in srgb, var(--dash-accent) 82%, white); transition: opacity var(--motion-fast) var(--ease-standard); }
+.sparkline i:hover { opacity: .6; }
+.healthList { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0 var(--space-4); margin: 0; }
+.healthList div { display: flex; justify-content: space-between; gap: var(--space-2); padding: var(--space-2) 0; border-bottom: 1px solid var(--dash-border); }
+.healthList dt { color: var(--dash-text-muted); font-size: var(--text-xs); }.healthList dd { margin: 0; font-size: var(--text-sm); font-variant-numeric: tabular-nums; }
+.alertList, .readinessList { display: grid; gap: var(--space-2); margin: var(--space-4) 0 0; padding: 0; list-style: none; }
+.alertList li { display: flex; align-items: center; gap: var(--space-2); padding: var(--space-2); border-radius: var(--radius-sm); background: var(--dash-warning-surface); color: var(--dash-warning); font-size: var(--text-xs); }
+.goodState { display: flex; align-items: center; gap: var(--space-2); margin: var(--space-4) 0 0; color: var(--dash-positive); font-size: var(--text-xs); }
+.integrationList, .queueList, .auditList { display: grid; margin: 0; padding: 0; list-style: none; }
+.integrationList li, .queueList li { display: flex; align-items: center; justify-content: space-between; gap: var(--space-3); padding: var(--space-3) 0; border-bottom: 1px solid var(--dash-border); }
+.integrationList li:last-child, .queueList li:last-child { border-bottom: 0; }
+.integrationList strong { display: block; font-size: var(--text-sm); text-transform: capitalize; }.integrationList span { display: block; margin-top: .2rem; color: var(--dash-text-muted); font-size: var(--text-xs); }
+.capabilityNote { color: var(--dash-text-faint); font-size: .65rem; font-weight: 700; letter-spacing: .05em; text-transform: uppercase; }
+.storeStates { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--space-3); }.storeStates > div { padding: var(--space-3); border: 1px solid var(--dash-border); border-radius: var(--radius-md); }.storeStates strong { display: block; margin-top: var(--space-2); font-size: var(--text-base); }.storeStates small { display: block; margin-top: var(--space-2); color: var(--dash-text-muted); font-size: var(--text-xs); line-height: 1.45; }
+.storeActions { display: flex; flex-wrap: wrap; gap: var(--space-2); margin-top: var(--space-4); }.storeActions .ui-button { flex: 1 1 10rem; }
+.readinessBlock { margin-top: var(--space-4); padding: var(--space-3); border: 1px solid var(--dash-warning); border-radius: var(--radius-md); background: var(--dash-warning-surface); }.readinessBlock > strong { font-size: var(--text-sm); }
+.readinessList li { display: flex; gap: var(--space-2); color: var(--dash-text-muted); font-size: var(--text-xs); line-height: 1.45; }.readinessList li > span { flex: 0 0 auto; color: var(--dash-positive); font-weight: 900; }.readinessList li:has(> span:first-child) > span:first-child { color: var(--dash-positive); }
+.dialogCopy { display: grid; gap: var(--space-4); }.dialogCopy p { margin: 0; color: var(--dash-text-muted); line-height: 1.55; }.actionError { padding: var(--space-3); border-radius: var(--radius-sm); background: var(--dash-negative-surface); color: var(--dash-negative) !important; font-size: var(--text-sm); }
+.queueList li > a, .queueList li > span { color: var(--dash-text); font-size: var(--text-sm); text-transform: capitalize; }.queueList li > a { color: var(--dash-accent); font-weight: 800; }.queueList strong { font-variant-numeric: tabular-nums; }
+.auditList li { display: flex; gap: var(--space-3); padding: var(--space-3) 0; border-bottom: 1px solid var(--dash-border); }.auditList li:last-child { border-bottom: 0; }.auditMark { display: grid; width: 1.8rem; height: 1.8rem; flex: 0 0 auto; place-items: center; border-radius: 50%; background: var(--dash-surface-muted); color: var(--dash-accent); }.auditList strong, .auditList span, .auditList small { display: block; }.auditList strong { font-size: var(--text-sm); text-transform: capitalize; }.auditList span, .auditList small { margin-top: .15rem; color: var(--dash-text-muted); font-size: var(--text-xs); }.auditList small { font-style: italic; }
+.reducedNote { display: flex; align-items: center; gap: var(--space-2); padding: var(--space-3) var(--space-4); border: 1px dashed var(--dash-border-strong); border-radius: var(--radius-md); color: var(--dash-text-muted); font-size: var(--text-sm); }
+@media (max-width: 1180px) { .metrics { grid-template-columns: repeat(3, minmax(0, 1fr)); }.primaryGrid, .secondaryGrid { grid-template-columns: repeat(2, minmax(0, 1fr)); }.primaryGrid > :last-child:nth-child(3), .secondaryGrid > :last-child:nth-child(3) { grid-column: span 2; } }
+@media (max-width: 720px) { .header { align-items: flex-start; flex-direction: column; }.refreshGroup { width: 100%; justify-content: space-between; }.metrics, .primaryGrid, .secondaryGrid { grid-template-columns: 1fr; }.primaryGrid > :last-child:nth-child(3), .secondaryGrid > :last-child:nth-child(3) { grid-column: auto; }.salesTotals, .storeStates, .healthList { grid-template-columns: 1fr; }.storeActions { flex-direction: column; }.storeActions .ui-button { width: 100%; }.workspace { gap: var(--space-4); } }
