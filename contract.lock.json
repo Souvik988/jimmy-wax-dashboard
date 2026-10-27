@@ -1,7 +1,7 @@
 {
   "openapi": {
     "path": "docs/backend-contract/openapi.yaml",
-    "sha256": "48b46e1f1862ba54b8b0485e5e12aba0af0809cbbe800e4e20f651406a09b146",
-    "version": "1.4.0"
+    "sha256": "54c94cbcb6db670d06b11bb0fc59a94e6bd8a41d083ea3b86b6525337ed3c8a9",
+    "version": "1.6.0"
   }
 }

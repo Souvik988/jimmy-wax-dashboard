@@ -1,0 +1,437 @@
+JIMMY & WAX CROSS PROJECT CONNECTIVITY AND READINESS AUDIT
+25 October 2026 | Dashboard, website, backend and Flutter customer app
+
+VERDICT
+
+The core is connected and passes substantial local verification. The system is
+not yet fully connected across every customer feature, and production readiness
+is not established. The largest gaps are multi-variant catalogue handling,
+website catalogue media/navigation, mobile order history/tracking, customer
+self-service, real providers and repeatable release configuration.
+
+No meaningful single completion percentage can be derived from the tests: a
+passing endpoint or screen does not prove every write, provider or device flow.
+
+SCOPE AND METHOD
+
+Audited these exact local projects:
+  Dashboard: C:/Users/MSI/OneDrive/Desktop/jimmy&wax_dashboard
+  Website:   C:/Users/MSI/OneDrive/Desktop/jimmy_nd _wax_website
+  Backend:   C:/Users/MSI/OneDrive/Desktop/jimmy&wax_backend
+  App:       C:/Users/MSI/OneDrive/Desktop/jimmy&wax_app
+
+The running architecture is a Next.js operator dashboard with a server-side API
+proxy, a React/Vite website, a Flutter app, an Express commerce API, a separate
+read-only experience API, PostgreSQL, and background workers. One gateway routes
+public reads to the experience API and commerce/admin requests to the commerce
+API. Redis is optional shared rate-limit storage. The active app uses the
+Express API; the Supabase dependency and older migration/docs remain in its tree.
+
+Local verification used a separate PostgreSQL container on port 55432 and two
+new databases: jimmywax_audit_test and jimmywax_audit_live. Business mutations,
+test accounts, orders, publications and rollback occurred only there. Existing
+business databases and source implementation were not changed. Existing seven
+dashboard contract modifications were preserved.
+
+No real deployed domain was identified from the supplied project configuration;
+the origins found are local addresses and deployment placeholders. These results
+therefore certify the stated local checks, not a production deployment. Real
+Razorpay/Shiprocket transactions, email/SMS delivery and native device release
+tests were not performed. Available Razorpay configuration was not used to spend
+money or contact the provider.
+
+CURRENT VERIFICATION RESULTS
+
+  Dashboard contract lock:                 PASS, v1.5.0
+  Dashboard TypeScript, lint and build:     PASS
+  Dashboard unit tests:                    PASS, 68 files / 398 tests
+  Dashboard live API response parsing:     PASS, 60 reads; team read skipped for MFA
+  Authenticated dashboard browser sweep:   PASS, 38 routes, no HTTP 5xx or JS exceptions
+  Dashboard sign-in and MFA enrollment:    PASS in browser
+  Dashboard cookie properties:             Secure, SameSite=Strict; session HttpOnly
+  Studio save/publish/website/rollback:    PASS against real local services
+  Backend OpenAPI vs implemented routes:   PASS, 238 documented / 238 served operations
+  Backend unit tests:                      PASS, 9 files / 73 tests
+  Backend database integration tests:      PASS, 17 files / 206 tests
+  Backend direct TypeScript checks:        PASS, all 11 app/package tsconfigs
+  Backend package typecheck script:        INEFFECTIVE here; see finding 12
+  Website unit tests:                      PASS, 2 files / 68 tests
+  Website production build:                PASS, with chunk/sitemap warnings
+  Website existing browser tests:          PASS, 8 tests using mocked API fixtures
+  Website real COD customer journey:       PASS against real local services
+  Flutter analysis/tests/native build:     NOT RUN; configured SDK is missing
+
+The real COD journey verified guest cart, demo OTP authentication, cart merge,
+address/serviceability, authoritative quote, order creation, admin visibility,
+and session/order persistence after browser reload. Demo OTP verifies the
+integration mechanics; it does not demonstrate real SMS delivery.
+
+The Studio journey saved through the dashboard's authenticated server proxy,
+validated and published a web release, observed the changed text on the actual
+website, then rolled back and observed the original text return.
+
+An additional source-reference heuristic found all 164 documented admin
+operations referenced under dashboard src/. This is useful coverage inventory,
+not proof that all 164 operations were exercised successfully.
+
+PRIORITIZED FINDINGS AND REQUIRED WORK
+
+1. HIGH -- Update dependencies before public release
+
+   Registry audits report dashboard: 2 critical and 2 high advisories; backend
+   workspace: 2 critical, 3 high and 3 moderate; website: 2 high dependency entries.
+   Counts are advisory/dependency scan results, not demonstrated exploit counts.
+   The backend workspace Next.js findings belong to its retired apps/admin
+   package; the active commerce and experience services run Express.
+
+   Next.js 16.3.8 falls within reported affected ranges. The two critical findings
+   are conditional: the image advisory's documented sharp workaround is already
+   satisfied by dashboard sharp 0.35.5, and no dashboard use-cache function or
+   cacheComponents setting was found. The Dockerfile also uses Alpine. Do not
+   describe this audit as proving an exploitable dashboard RCE. Upgrade Next.js
+   to the maintained patched release (advisories identify 16.4.1), align
+   eslint-config-next, and rerun tests.
+
+   The active commerce service resolves body-parser 2.3.0 and uses Express JSON,
+   raw and URL-encoded parsers with default decompression. Its high-severity
+   compressed-body process-crash advisory is relevant to these public parsers.
+   Update the Express dependency graph to body-parser 2.4.0 or newer, or apply
+   the maintainer's documented mitigation after compatibility review.
+
+   Update Zod past 4.6.5 (patched minimum 4.6.6), backend Nodemailer (advisories
+   identify 10.1.4), and the website Vite/source-map-js dependency graph. Vite is
+   currently a production dependency, but its dev-server issues should not be
+   equated with vulnerability of a static-only deployed dist/ site.
+
+   Evidence: package.json, backend/package.json, backend/apps/admin/package.json,
+   website/package.json, and the three dependency JSON files in the evidence folder.
+   Advisory sources:
+   https://github.com/vercel/next.js/security/advisories/GHSA-2464-fhr4-w9xw
+   https://github.com/vercel/next.js/security/advisories/GHSA-673q-mjm6-r5xr
+   https://github.com/advisories/GHSA-mrhx-c7xc-m3w5
+   https://github.com/advisories/GHSA-27r3-jxmh-p828
+
+2. HIGH -- Multi-variant products duplicate and disappear across pages
+
+   Reproduced with a second synthetic active variant for an existing product.
+   A full public catalogue page returned both rows with the same product ID.
+   Walking limit=1 pages returned only one variant for that product: the other
+   was skipped. The database view produces one row per active variant, while
+   the cursor only includes (sort_order, product_id). Product detail also selects
+   the first row without an explicit variant choice. Clients key products by
+   product ID and have no complete variant-selection flow.
+
+   Fix the public contract deliberately: return a product with its variants and
+   let the client select one, or use unique variant keys/cursors consistently.
+   Test two or more active variants, same-product page boundaries, PDP selection,
+   price/stock changes and checkout with each variant on both clients.
+
+   Evidence: backend/apps/experience-api/src/app.ts:250-278;
+   db/migrations/20261004100000_b9_experience_studio.sql:15;
+   variant-pagination.json in the evidence folder.
+
+3. HIGH -- Dashboard product images do not drive the native website catalogue
+
+   Website ApiProduct does not consume the backend media array. toProduct()
+   picks pictures and films from the hard-coded PRESENTATION map; unknown
+   products get a generic collection image. A dashboard product image change
+   therefore does not update the native shop/PDP/cart presentation.
+
+   Use approved backend product media as the primary gallery, retaining bundled
+   presentation as an explicit fallback. Verify upload -> approval -> product
+   assignment -> website listing/PDP/cart without changing website code.
+
+   Evidence: website/src/data/products.ts:85-104.
+   Studio page-block media is a separate path and is implemented; this finding
+   concerns native catalogue presentation.
+
+4. HIGH -- Website category and collection actions lose their destination
+
+   resolveAction() maps every category and collection to /shop, dropping the ID
+   or slug. Profile/addresses actions map to orders; help maps to the brand story.
+   These links resolve safely but do not implement their requested destination.
+
+   Add category/collection routes or URL filters backed by the corresponding
+   API. Give profile, address management and support their actual destinations.
+   Test a Studio CTA through to the intended filtered products or account screen.
+
+   Evidence: website/src/lib/actions.ts:29-46.
+
+5. HIGH -- Mobile order history and tracking are only partially connected
+
+   loadUserData() requests orders with limit=1. The app stores latestOrder rather
+   than a history collection. OrdersScreen displays one order and hard-codes
+   'Order placed'. TrackingScreen constructs OrderDetailView without passing
+   live status, so it defaults to placed. There is no repository shipment-fetch
+   path connecting dashboard fulfilment changes to this timeline.
+
+   Build paginated order history, server status/payment fields and shipment/event
+   loading with refresh. Verify dashboard processing -> shipped -> delivered and
+   cancellation/payment expiry in the customer's app, including older orders.
+
+   Evidence: app/lib/core/data/api_store_repository.dart:203-241;
+   app/lib/main.dart:3705-3800; app/lib/features/orders/order_detail_view.dart:27.
+
+6. HIGH -- Mobile historical receipts depend on the current catalogue
+
+   _orderFromJson() reconstructs order items by looking up current products and
+   drops lines whose products no longer exist in that catalogue. It discards the
+   historical name/variant/unit-price data already supplied by order lines.
+   OrdersScreen then accesses purchase.items.first without an empty-list guard.
+   Archiving all products in an old order can produce an empty receipt and an
+   unsafe access; changing a current product can also change its old receipt.
+
+   Introduce an immutable order-line model from the order response, keep images
+   optional, and safely render archived/deleted products and missing media.
+   This is a code-traced failure path; native runtime reproduction is outstanding.
+
+   Evidence: app/lib/core/data/api_store_repository.dart:361-383;
+   app/lib/core/data/catalog.dart:65; app/lib/main.dart:3725.
+
+7. HIGH -- Real customer SMS sign-in needs implementation
+
+   SMS_PROVIDER supports only none or console. ConsoleSmsSender logs messages;
+   the production main service never uses it for real delivery. The demo phone
+   path works locally, but other phone numbers cannot receive production OTPs
+   through the current implementation. Supplying a vendor key alone is insufficient.
+
+   Implement a real provider adapter, configure the approved sender/template,
+   and verify delivery, cooldown, expiry, abuse limits and provider failures.
+   Evidence: backend/packages/config/src/index.ts:46-48;
+   backend/packages/integrations/src/sms.ts; backend/apps/commerce-api/src/main.ts.
+
+8. HIGH -- Customer self-service is behind backend/admin capability
+
+   The backend has returns, invoice, reviews, notification and account endpoints.
+   The website has no complete customer return/refund request, invoice access,
+   wishlist/review submission, notification inbox, or account export/deletion UI.
+   The app supports wishlist, reviews and preference saving, but does not connect
+   customer returns, invoices, cancellation, account export/deletion or a real
+   notification inbox through its current repository/screen flows.
+
+   Add these journeys in a declared launch scope rather than counting the
+   existence of backend routes as finished customer features. A phone-only account
+   also needs OTP reauthentication for deletion: the backend deletion endpoint
+   currently demands a password and deleteAccount() verifies password_hash,
+   while phone-created accounts can have no password.
+
+   Evidence: backend/apps/commerce-api/src/serviceRoutes.ts;
+   backend/apps/commerce-api/src/authRoutes.ts:370;
+   backend/packages/commerce-domain/src/identity.ts:431-435;
+   website/src/lib/shop.ts; app/lib/core/data/api_store_repository.dart.
+
+9. HIGH -- Policies are not connected to the customer experience
+
+   The app's policy destinations still open SetupRequiredPolicyScreen even
+   though the backend offers published content endpoints. Website checkout has
+   a terms statement without a connected terms destination in that flow.
+
+   Supply official store copy and route privacy/terms/shipping/returns pages to
+   the same published backend content on both clients. Verify navigation from
+   checkout, account and footer and document the policy version displayed.
+   Evidence: app/lib/main.dart:4458; website/src/pages/Checkout.tsx;
+   backend/apps/experience-api/src/app.ts:337-360.
+
+10. HIGH -- Real fulfilment, refunds and outbound messages need provider acceptance
+
+   Manual fulfilment and fake-provider shipping/payment logic have integration
+   coverage. This audit did not verify real Razorpay capture/refund, webhook
+   delivery, Shiprocket dispatch/labels/pickup, real SMTP delivery or bounce handling.
+   Local credential presence does not establish that these flows work externally.
+   Shiprocket createReturn() explicitly throws 'Reverse pickups are not implemented'.
+
+   Complete a controlled provider acceptance sequence and reconcile the result
+   against dashboard and customer views. Implement reverse pickup or explicitly
+   provide a manual operational path before promising automated returns.
+   Evidence: backend/packages/integrations/src/shipping.ts:736-744;
+   backend/apps/workers/src/main.ts; backend/packages/commerce-domain/src/payments.ts.
+
+11. HIGH -- Contract versions have drifted between projects
+
+   Canonical backend OpenAPI and dashboard copy: v1.5.0, identical SHA-256
+   eee7a28b09bdd20a2f98a07d3f28e3bdc18d7ad46ae12ebbd02978166ca63d3c.
+   Backend contracts/pack/openapi.yaml: v1.4.0-draft.1.
+   App contracts/api/openapi.yaml: v0.1.0-draft.
+   Website uses handwritten types with no pinned shared contract gate.
+
+   Refresh the generated pack and app contract from the canonical source, pin
+   consumption by hash/version, and check all clients in CI. The stale app file
+   does not prove that all its runtime requests are stale: current repository
+   code already calls modern endpoints. Documentation and automated guarantees
+   are what demonstrably disagree.
+
+12. HIGH -- Backend typecheck can succeed without checking any project
+
+   pnpm typecheck printed 'No projects matched the filters' and exited 0 in the
+   installed Windows/pnpm environment. Direct tsc runs against all 11 tsconfigs
+   passed, so this is a verification-gate defect rather than a discovered type error.
+
+   Make workspace selection reliable and fail if zero projects match. Record
+   the number of checked packages and prove the gate rejects a deliberate type
+   error in a temporary test branch. CI on Linux was not run here.
+   Evidence: backend/package.json:10; backend-direct-types.log.
+
+13. HIGH -- Production Compose needs service-specific configuration
+
+   Commerce, experience and workers inherit the same .env.prod, including one
+   DATABASE_URL and provider/signing secrets. The example DATABASE_URL is the
+   commerce login despite the runbook requiring separate login roles per service.
+   Experience/workers do not override TRUST_PROXY_HOPS, while loadConfig() applies
+   its production proxy requirement to every service. The supplied templates
+   therefore need completion and service-specific overrides before deployment.
+
+   Provide separate database URLs and minimal secrets per service, validate each
+   actual environment, and smoke-test the built topology with migrations, workers,
+   gateway/CORS, storage and readiness checks. Permission tests with deliberately
+   separate roles do not prove that this shared-env deployment preserves them.
+   Evidence: infrastructure/prod/docker-compose.prod.yml:7-34;
+   infrastructure/prod/.env.prod.example; backend/packages/config/src/index.ts;
+   docs/build/PRODUCTION_RUNBOOK.md:25-26.
+
+14. HIGH -- Source control and reproducibility are incomplete
+
+   The backend Git repository has no commits and no tracked files; the whole
+   backend, contracts, migrations, infrastructure and .data are untracked.
+   Website and app paths are not inside Git repositories. The dashboard does
+   have Git history and existing uncommitted contract changes.
+
+   Establish version control/backups for the three projects, exclude credentials,
+   storage/runtime data and generated artifacts, then commit reviewed source,
+   migrations, lockfiles and deployment configuration. Add CI for website/app and
+   a release manifest tying all four revisions to the same contract version.
+   Do not blindly git-add the backend root: .data and runtime content are present.
+
+15. RELEASE BLOCKER -- Mobile tooling and signing still need a verified release
+
+   flutter is unavailable on PATH and the configured SDK at
+   C:/Users/MSI/Downloads/flutter no longer exists. Fresh Flutter analysis/tests
+   could not run. Existing screenshots, APKs and prior test logs are historical
+   evidence only. Android still uses com.example.jimmy_wax_app; release signing
+   intentionally requires owner keys. iOS signing/archive needs macOS.
+
+   Restore/configure the SDK, run the complete app test suite, verify the live API
+   adapter on a device, approve permanent app IDs/domains, configure private
+   signing, and test signed releases including hosted payment return and links.
+   Evidence: app/android/local.properties; app/.dart_tool/package_config.json;
+   app/android/app/build.gradle.kts; app/docs/PRODUCTION_READINESS.md.
+
+16. MEDIUM -- Website catalogue and history stop at the first page
+
+   Catalogue reads limit=50 and ignores nextCursor; orders does the same.
+   Sitemap generation fetches one product page with limit=100. Larger catalogues
+   and customer histories silently lose entries; PDP lookup also depends on the
+   loaded catalogue list. Implement pagination and direct detail fetching.
+   Evidence: website/src/lib/catalog.tsx:42; website/src/lib/shop.ts:70;
+   website/src/pages/ProductDetail.tsx; website/scripts/postbuild.mjs.
+
+17. MEDIUM -- Improve website network and shipment error handling
+
+   Website raw API fetch has no request deadline, so requests can leave forms
+   waiting until the browser/network fails. shop.shipments() converts every
+   failure to an empty list, making a tracking outage indistinguishable from
+   no shipments. Add bounded reads, visible retry states and distinct empty/error
+   states; preserve idempotency and never automatically replay unsafe writes.
+   Evidence: website/src/lib/api.ts:73; website/src/lib/shop.ts:72.
+
+18. MEDIUM -- Push and marketing delivery are not finished
+
+   The backend stores device tokens and in-app notifications, but explicitly has
+   no push delivery. Notification preferences and message templates do not make
+   a customer push channel or marketing broadcast workflow. notify.ts states
+   marketing is not implemented. Add a consent-aware sender and visible delivery
+   state only if these channels are part of the intended launch scope.
+   Evidence: backend/apps/commerce-api/src/serviceRoutes.ts:182;
+   backend/packages/commerce-domain/src/notify.ts:30.
+
+19. MEDIUM -- Release configuration and performance need stronger defaults
+
+   The website production build currently succeeds with no SITE_ORIGIN and skips
+   sitemap generation; its API origin falls back to localhost if no production
+   value is supplied. The build warns about a 518.20 kB main JS chunk (159.70 kB
+   gzip). Fail production preflight for missing/public-insecure origins and use
+   route/component splitting where it improves the customer journey.
+
+   Keep one approved package manager/lockfile per project instead of website
+   npm and pnpm lockfiles plus latest dependency ranges. Split app/lib/main.dart
+   (7,479 lines) into feature modules with clear state/repository boundaries.
+   Remove retired dependencies/docs only after checking their remaining uses.
+
+20. LOW -- Document the intentional dashboard media upload limit
+
+   Dashboard video uploads stop at 15 MiB while the backend supports 100 MiB.
+   The dashboard intentionally limits buffered request bodies and labels the UI
+   accurately. This is an operational limit, not a silent connectivity failure.
+   Add a streaming upload path and memory/load verification if larger campaigns
+   are required. Evidence: src/lib/api/resources/media-validation.ts:3-11.
+
+FEATURE CONNECTIVITY MATRIX
+
+  Feature                 Dashboard/backend                Website                     App
+  Authentication          Browser MFA/session verified     Demo OTP/session verified   Express adapter; native rerun pending
+  Roles/permissions       Backend tests + guarded screens  Customer boundary in API    Shared API ownership boundary
+  Product names/prices    Connected; live reads pass       Connected                   Adapter connected
+  Multi-variant products  Creation exists                  Incomplete/duplicate IDs    Incomplete/product keyed
+  Product image changes   Media/catalogue APIs connected   Native catalogue ignores    Backend media parsed
+  Categories/collections  Editors/API connected            CTA destination lost        Collection adapter present
+  Inventory               Ledger/concurrency tests pass    API availability consumed   API availability consumed
+  Cart/coupon/quote       Backend integration tests pass   Cart/quote live verified    Adapter; fixture tests in source
+  COD checkout            Order/admin APIs connected       Live browser flow passes    Adapter; native rerun pending
+  Online payment/refund   Gateway adapters tested locally  Hosted redirect implemented Browser handoff implemented
+  Real money settlement   External acceptance pending      External acceptance pending External acceptance pending
+  Order history/detail    Connected/read checks pass       Connected; first 50 only    Latest order only
+  Shipment tracking       Admin/provider paths exist       Connected, hides read errors Live feed not connected
+  Returns/refunds         Admin/customer APIs exist        Customer UI incomplete      Customer UI incomplete
+  Invoice                 Admin/customer APIs exist        Customer access incomplete  Customer access incomplete
+  Reviews                 Moderation/customer APIs exist   Customer review UI missing  Submission adapter present
+  Wishlist                Customer API exists              Missing customer flow       Adapter present
+  Policies                Content/admin APIs exist         Checkout destination gap    Setup screens remain
+  Account export/delete   Backend endpoints exist          UI missing                  UI missing; phone reauth gap
+  Notification prefs      API exists                       Incomplete                  Saves preferences
+  Notification inbox/push API exists; no push sender       Incomplete                  Inbox/push incomplete
+  Studio web publish      Save/publish/rollback verified   Actual website verified     Not applicable to web channel
+  Studio app publish      Backend bundle tests pass        Not applicable              Bridge/renderer code present; native not rerun
+  Analytics/finance/ops   Screens + parsers connected      Not customer-facing         Not customer-facing
+  Team/integrations       Screens load, MFA read works     Not customer-facing         Not customer-facing
+
+Real-provider and app-device checks remain explicit acceptance work; code
+presence and fixture tests are not treated as live provider/device verification.
+
+RECOMMENDED EXECUTION ORDER
+
+1. Protect and stabilize the source: safe Git baselines/backups, dependency
+   remediation, contract synchronization, reliable typecheck/CI, service-specific
+   production configuration and restored Flutter tooling.
+2. Fix catalogue propagation: variant contract/cursors and selection, backend
+   product media on the website, category/collection destinations and pagination.
+3. Finish post-purchase: immutable mobile receipts, full order history, real
+   shipment status, cancellation, returns, invoices, policies and account controls.
+4. Complete operational acceptance: real SMS and SMTP, Razorpay payment/refund
+   callbacks, Shiprocket forward/reverse/manual workflows, signed Android/iOS
+   builds, backups/restores, worker restarts and production monitoring.
+5. Improve beyond launch: push/marketing if needed, route splitting, app feature
+   extraction and larger media upload support.
+
+ACCEPTANCE FOR A CONNECTED RELEASE
+
+One reproducible staging run should create a product with two variants and
+approved media in the dashboard, see/select both correctly on web and app, apply
+a coupon, place COD and prepaid orders, see identical records in the dashboard,
+ship them, see tracking on both clients, issue an invoice, submit/moderate a
+review, request/decide a return and confirm the refund. Repeat after refresh,
+network interruption, concurrent stock changes, worker restart and release
+rollback. Run permission tests with non-admin roles and independent customers.
+All four deployable revisions must identify the same canonical API version.
+
+EVIDENCE
+
+Saved under docs/build/evidence/cross-project-2026-10-25/:
+  summary.json, live-browser.json, customer-browser.json, variant-pagination.json,
+  dashboard-drift.log, dashboard-build.log, backend-direct-types.log,
+  backend-integration.log, website-e2e.log, and dependency audit JSON reports.
+
+The authenticated sweep contained an existing seeded-product validation alert
+('The same image is listed twice') on the product editor; routes still loaded
+without server errors. Clean that seeded media data before accepting a product
+update. The sweep is not a claim that every form mutation or every viewport was
+exercised. Accessibility/responsive and real device acceptance should be part
+of the next release gate.

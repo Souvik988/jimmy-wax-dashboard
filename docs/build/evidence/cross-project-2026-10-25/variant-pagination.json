@@ -1,0 +1,48 @@
+{
+  "paged": [
+    {
+      "product": "twinkle-shine-leather-polish",
+      "variant": "audit-second-polish-variant"
+    },
+    {
+      "product": "polish-cloth-kit",
+      "variant": "polish-cloth-kit"
+    },
+    {
+      "product": "complete-care-kit",
+      "variant": "complete-care-kit"
+    },
+    {
+      "product": "black-shoe-care",
+      "variant": "black-shoe-care"
+    }
+  ],
+  "full": [
+    {
+      "product": "twinkle-shine-leather-polish",
+      "variant": "twinkle-shine-leather-polish"
+    },
+    {
+      "product": "twinkle-shine-leather-polish",
+      "variant": "audit-second-polish-variant"
+    },
+    {
+      "product": "polish-cloth-kit",
+      "variant": "polish-cloth-kit"
+    },
+    {
+      "product": "complete-care-kit",
+      "variant": "complete-care-kit"
+    },
+    {
+      "product": "black-shoe-care",
+      "variant": "black-shoe-care"
+    }
+  ],
+  "missingVariantIds": [
+    "twinkle-shine-leather-polish"
+  ],
+  "duplicateProductIds": [
+    "twinkle-shine-leather-polish"
+  ]
+}

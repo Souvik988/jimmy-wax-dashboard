@@ -1,0 +1,60 @@
+{
+  "date": "2026-10-25",
+  "scope": "Four local projects; isolated PostgreSQL; no production certification",
+  "dashboard": {
+    "browserExceptions": 0,
+    "authenticatedRoutes": 38,
+    "liveApiReadsPassed": 60,
+    "lint": "pass",
+    "types": "pass",
+    "build": "pass",
+    "unitFiles": 68,
+    "liveApiReadsSkipped": [
+      "team requires MFA in read-only parser probe"
+    ],
+    "unitTests": 398,
+    "contract": "1.5.0",
+    "publishWebsiteRollback": "pass"
+  },
+  "backend": {
+    "unitTests": 73,
+    "directTypecheckProjects": 11,
+    "documentedOperations": 238,
+    "integrationTests": 206,
+    "packageTypecheck": "No projects matched; false success",
+    "servedOperations": 238,
+    "directTypes": "pass"
+  },
+  "website": {
+    "unitTests": 68,
+    "adminOrderVisibility": "pass",
+    "fixtureBrowserTests": 8,
+    "build": "pass",
+    "realCodJourney": "pass",
+    "sessionReload": "pass"
+  },
+  "app": {
+    "reason": "flutter unavailable and configured SDK missing",
+    "freshTests": "not run",
+    "review": "source and existing tests inspected"
+  },
+  "security": {
+    "qualification": "Advisory counts; Next image workaround sharp 0.35.5 present, no dashboard use-cache functions found; retired backend admin contributes Next findings",
+    "dashboard": {
+      "high": 2,
+      "critical": 2
+    },
+    "backendWorkspace": {
+      "moderate": 3,
+      "high": 3,
+      "critical": 2
+    },
+    "website": {
+      "high": 2
+    }
+  },
+  "reproducedDefects": [
+    "multi-variant duplicate product IDs and cursor omission"
+  ],
+  "sourceChanges": "Audit report/evidence only; pre-existing contract modifications preserved"
+}

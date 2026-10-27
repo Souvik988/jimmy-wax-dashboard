@@ -380,6 +380,23 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/v1/orders/{id}/payment-attempts/confirm": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** @description Finishes an online payment from the checkout SDK callback without waiting for the provider webhook (webhooks cannot reach a development machine and may lag). Send the references the SDK returned: Razorpay `razorpay_order_id` as `providerOrderId`, `razorpay_payment_id` as `providerPaymentId` and `razorpay_signature` as `signature`. The server verifies the signature (HMAC-SHA256 of `order_id|payment_id` with the key secret), then asks the provider for the order status itself and applies it through the same idempotent path as webhooks; the client never decides success. The response is the server-confirmed state (`paymentStatus` is `paid` once the provider reports the order paid; otherwise keep polling `GET /v1/orders/{id}/payment`). Safe to repeat. 401 when the signature is wrong, 404 when the reference does not belong to the caller's order, 503 (retryable) when the provider cannot confirm yet. */
+        post: operations["confirmPaymentAttempt"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/v1/orders/{id}/payment": {
         parameters: {
             query?: never;
@@ -391,6 +408,57 @@ export interface paths {
         get: operations["getOrderPayment"];
         put?: never;
         post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/orders/{id}/payment-link": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** @description For the mobile app, which cannot POST a form to the provider. Creates or resumes the order's single live payment attempt (same rules as `createPaymentAttempt`) and returns a short-lived (10 minutes) signed `url` to open in the system browser; that page forwards the customer to the provider's hosted checkout. When the customer returns, read the server-confirmed state from `GET /v1/orders/{id}/payment` (also on app resume); never infer success from the browser. If `APP_RETURN_URL` is configured the browser is sent to `<APP_RETURN_URL>?order=<id>&pay=paid|pending|failed`, otherwise it shows a "return to the app" page. */
+        post: operations["createPaymentLink"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/payments/{provider}/start": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** @description Browser page reached through the signed link from `createPaymentLink`; not called by app code. Verifies the token (HMAC, 10 minute expiry, names only the order) and renders a tiny page that auto-submits the hosted-checkout form built from our own data. 410 when the link expired or the order can no longer be paid. */
+        get: operations["paymentCheckoutStart"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/payments/{provider}/return": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** @description Browser landing for hosted (redirect) checkout - not called by app code. The website posts the customer to the provider's hosted page with this URL as `callback_url`; the provider then POSTs the browser here as `application/x-www-form-urlencoded` (Razorpay: `razorpay_payment_id`, `razorpay_order_id`, `razorpay_signature`, or `error[...]` fields when the payment failed or was cancelled). No session is needed: the server verifies the signature, asks the provider for the order status itself, applies it idempotently and answers `303` to `STOREFRONT_ORIGIN/orders/{orderId}?pay=paid|pending|failed` (`&placed=1` when paid). The destination comes only from server configuration, never from the request. Always read the final state from `GET /v1/orders/{id}/payment`. */
+        post: operations["paymentCheckoutReturn"];
         delete?: never;
         options?: never;
         head?: never;
@@ -923,7 +991,7 @@ export interface paths {
         };
         get?: never;
         put?: never;
-        /** @description Erases personal data (login, profile, addresses, wishlist, devices, reviews). Orders and their address snapshots are retained for tax/accounting. Refused (409) while orders are in progress. */
+        /** @description Erases personal data after reauthentication by password or a fresh single-use OTP bound to the signed-in account phone. Request a new code through the OTP request endpoint. Orders and their address snapshots are retained. Refused (409) while orders are in progress. */
         post: operations["deleteAccount"];
         delete?: never;
         options?: never;
@@ -3412,6 +3480,8 @@ export interface components {
             codMaxOrderPaise: number | null;
             /** @description Added to every Cash-on-Delivery order */
             codFeePaise: number;
+            /** @description True when customers can pay online (UPI, cards, netbanking). Offer the option only then; the quote request still decides with paymentMethod online. */
+            onlinePaymentsEnabled?: boolean;
             /** @description 1800 = 18% */
             gstRateBps: number;
             taxInclusive: boolean;
@@ -3453,6 +3523,8 @@ export interface components {
             suitableSurfaces?: string | null;
             boxContents?: string | null;
             variant: components["schemas"]["Variant"];
+            /** @description All active variants in a stable order; variant is the in-stock default when available. */
+            variants?: components["schemas"]["Variant"][];
             media: components["schemas"]["Media"][];
         };
         ProductPage: {
@@ -3551,6 +3623,8 @@ export interface components {
             couponCode?: string;
         };
         OrderLine: {
+            /** @description Immutable order line identifier used when requesting a return */
+            orderItemId?: number;
             variantId: string;
             productId: string;
             sku: string;
@@ -4832,6 +4906,43 @@ export interface operations {
             422: components["responses"]["Error"];
         };
     };
+    confirmPaymentAttempt: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: components["parameters"]["Uuid"];
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": {
+                    providerOrderId: string;
+                    providerPaymentId: string;
+                    signature: string;
+                };
+            };
+        };
+        responses: {
+            /** @description Server-confirmed state */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        orderStatus: string;
+                        paymentStatus: string;
+                        attemptStatus: string;
+                    };
+                };
+            };
+            401: components["responses"]["Error"];
+            404: components["responses"]["Error"];
+            503: components["responses"]["Error"];
+        };
+    };
     getOrderPayment: {
         parameters: {
             query?: never;
@@ -4852,6 +4963,94 @@ export interface operations {
                     "application/json": components["schemas"]["PaymentStatusView"];
                 };
             };
+        };
+    };
+    createPaymentLink: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: components["parameters"]["Uuid"];
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Created */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** Format: uri */
+                        url: string;
+                        /** Format: date-time */
+                        expiresAt: string;
+                        attempt: components["schemas"]["PaymentAttempt"];
+                    };
+                };
+            };
+            409: components["responses"]["Error"];
+            422: components["responses"]["Error"];
+        };
+    };
+    paymentCheckoutStart: {
+        parameters: {
+            query: {
+                t: string;
+            };
+            header?: never;
+            path: {
+                provider: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description HTML page that forwards to the provider */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            404: components["responses"]["Error"];
+            /** @description Link expired or order not payable */
+            410: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    paymentCheckoutReturn: {
+        parameters: {
+            query?: {
+                /** @description Set by the app hand-off page: answer with the app deep link (or a close-this-tab page) instead of the website redirect. */
+                c?: "app";
+            };
+            header?: never;
+            path: {
+                provider: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/x-www-form-urlencoded": Record<string, never>;
+            };
+        };
+        responses: {
+            /** @description Redirect back to the storefront order page */
+            303: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            404: components["responses"]["Error"];
         };
     };
     receiveWebhook: {
@@ -5701,6 +5900,8 @@ export interface operations {
             content: {
                 "application/json": {
                     password: string;
+                } | {
+                    code: string;
                 };
             };
         };

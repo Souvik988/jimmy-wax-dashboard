@@ -75,12 +75,12 @@ describe('returns and refunds centre', () => {
     expect(resources.getSettings).not.toHaveBeenCalled();
   });
 
-  it('keeps return decisions role-gated and never offers inventory receipt', async () => {
+  it('keeps return decisions and inventory receipt role-gated', async () => {
     resources.getReturns.mockResolvedValue({ items: [requested, approved] });
     renderCenter();
 
     expect(await screen.findAllByRole('link', { name: 'Open order JW-20261007-5396FAA7' })).toHaveLength(2);
-    expect(screen.getByText(/receipt is withheld/i)).toBeInTheDocument();
+    expect(screen.getByText(/receipt requires fulfilment and inventory write/i)).toBeInTheDocument();
     expect(screen.queryByRole('button', { name: /approve return/i })).not.toBeInTheDocument();
     expect(screen.queryByRole('button', { name: /decline return/i })).not.toBeInTheDocument();
     expect(screen.queryByRole('button', { name: /receive return|restock/i })).not.toBeInTheDocument();

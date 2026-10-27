@@ -17,6 +17,7 @@ import { formatMoney } from '@/lib/format/money';
 import { formatIst } from '@/lib/format/time';
 
 import styles from './returns-refunds.module.css';
+import { ReturnReceipt } from './return-receipt';
 
 type QueryProblem = { message: string; requestId?: string; offline: boolean; forbidden: boolean };
 type Decision = { item: AdminReturn; approve: boolean };
@@ -53,7 +54,7 @@ function QueryState({ problem, retry, title }: { problem: QueryProblem; retry: (
   return <ErrorState {...props}>{problem.message}</ErrorState>;
 }
 
-function ReturnCard({ item, canDecide, onDecision }: { item: AdminReturn; canDecide: boolean; onDecision: (item: AdminReturn, approve: boolean) => void }): ReactNode {
+function ReturnCard({ item, canDecide, canReceive, onDecision, onReceived }: { item: AdminReturn; canDecide: boolean; canReceive: boolean; onDecision: (item: AdminReturn, approve: boolean) => void; onReceived: (notice: string) => void }): ReactNode {
   return <article className={styles.returnCard}>
     <div className={styles.cardTop}>
       <div className={styles.returnIdentity}>
@@ -82,9 +83,7 @@ function ReturnCard({ item, canDecide, onDecision }: { item: AdminReturn; canDec
       </section>
     </div>
 
-    {item.status === 'approved' ? <p className={styles.safetyNotice}>
-      Receipt is withheld. Receiving this return changes inventory, but the backend route does not enforce the required inventory permission and MFA step-up. No receive or restock action is available here.
-    </p> : null}
+    {item.status === 'approved' ? canReceive ? <ReturnReceipt item={item} onReceived={onReceived} /> : <p className={styles.safetyNotice}>Receipt requires fulfilment and inventory write permissions and an MFA session.</p> : null}
     {canDecide && item.status === 'requested' ? <div className={styles.decisionActions}>
       <Button variant="secondary" onClick={() => onDecision(item, true)}>Approve return {item.orderNumber}</Button>
       <Button variant="danger" onClick={() => onDecision(item, false)}>Decline return {item.orderNumber}</Button>
@@ -92,7 +91,7 @@ function ReturnCard({ item, canDecide, onDecision }: { item: AdminReturn; canDec
   </article>;
 }
 
-function ReturnSection({ canDecide }: { canDecide: boolean }): ReactNode {
+function ReturnSection({ canDecide, canReceive }: { canDecide: boolean; canReceive: boolean }): ReactNode {
   const [status, setStatus] = useState<StatusFilter>('all');
   const [decision, setDecision] = useState<Decision | null>(null);
   const [note, setNote] = useState('');
@@ -142,7 +141,7 @@ function ReturnSection({ canDecide }: { canDecide: boolean }): ReactNode {
     {error && query.data ? <p className={styles.stale} role="alert">Refresh failed; showing the last verified list. {error.requestId ? `Request ID: ${error.requestId}` : ''}</p> : null}
     {!query.isLoading && !error && query.data?.items.length === 0 ? <EmptyState title="No return requests">The backend returned no matching return records.</EmptyState> : null}
     {query.data?.items.length ? <div className={styles.returnList} aria-label="Return records">
-      {query.data.items.map((item) => <ReturnCard key={item.id} item={item} canDecide={canDecide} onDecision={(selected, approve) => { setNote(''); mutation.reset(); setDecision({ item: selected, approve }); }} />)}
+      {query.data.items.map((item) => <ReturnCard key={item.id} item={item} canDecide={canDecide} canReceive={canReceive} onDecision={(selected, approve) => { setNote(''); mutation.reset(); setDecision({ item: selected, approve }); }} onReceived={setNotice} />)}
     </div> : null}
     {notice ? <p className={styles.success} role="status"><ClipboardCheck size={16} aria-hidden="true" />{notice}</p> : null}
 
@@ -258,8 +257,9 @@ function ReturnPolicy(): ReactNode {
   </aside>;
 }
 
-export function ReturnsRefunds({ canDecideReturns, canViewRefunds, canProcessRefunds = false, canViewReturnPolicy }: {
+export function ReturnsRefunds({ canDecideReturns, canReceiveReturns = false, canViewRefunds, canProcessRefunds = false, canViewReturnPolicy }: {
   canDecideReturns: boolean;
+  canReceiveReturns?: boolean;
   canViewRefunds: boolean;
   canProcessRefunds?: boolean;
   canViewReturnPolicy: boolean;
@@ -275,7 +275,7 @@ export function ReturnsRefunds({ canDecideReturns, canViewRefunds, canProcessRef
       {canViewReturnPolicy ? <ReturnPolicy /> : <div className={styles.policyHidden}><strong>Return policy is server-enforced</strong><span>Duration is not visible to this role.</span></div>}
     </header>
 
-    <ReturnSection canDecide={canDecideReturns} />
+    <ReturnSection canDecide={canDecideReturns} canReceive={canReceiveReturns} />
     {canViewRefunds ? <RefundSection canProcess={canProcessRefunds} /> : null}
   </main>;
 }

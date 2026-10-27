@@ -1,7 +1,7 @@
 openapi: 3.0.3
 info:
   title: JIMMY WAX Commerce API
-  version: 1.4.0
+  version: 1.6.0
   description: |
     Canonical contract shared by the Flutter customer app and the Express backend.
     Conventions: REST under `/v1`; ids are opaque strings; timestamps are UTC ISO-8601;
@@ -306,6 +306,20 @@ paths:
         '201': { description: Created, content: { application/json: { schema: { $ref: '#/components/schemas/PaymentAttempt' } } } }
         '409': { $ref: '#/components/responses/Error' }
         '422': { $ref: '#/components/responses/Error' }
+  /v1/orders/{id}/payment-attempts/confirm:
+    post:
+      tags: [ Orders ]
+      operationId: confirmPaymentAttempt
+      description: |
+        Finishes an online payment from the checkout SDK callback without waiting for the provider webhook (webhooks cannot reach a development machine and may lag). Send the references the SDK returned: Razorpay `razorpay_order_id` as `providerOrderId`, `razorpay_payment_id` as `providerPaymentId` and `razorpay_signature` as `signature`. The server verifies the signature (HMAC-SHA256 of `order_id|payment_id` with the key secret), then asks the provider for the order status itself and applies it through the same idempotent path as webhooks; the client never decides success. The response is the server-confirmed state (`paymentStatus` is `paid` once the provider reports the order paid; otherwise keep polling `GET /v1/orders/{id}/payment`). Safe to repeat. 401 when the signature is wrong, 404 when the reference does not belong to the caller's order, 503 (retryable) when the provider cannot confirm yet.
+      security: [ { bearerAuth: [] } ]
+      parameters: [ { $ref: '#/components/parameters/Uuid' } ]
+      requestBody: { required: true, content: { application/json: { schema: { type: object, required: [ providerOrderId, providerPaymentId, signature ], properties: { providerOrderId: { type: string, minLength: 3, maxLength: 100 }, providerPaymentId: { type: string, minLength: 3, maxLength: 100 }, signature: { type: string, minLength: 16, maxLength: 256 } } } } } }
+      responses:
+        '200': { description: Server-confirmed state, content: { application/json: { schema: { type: object, required: [ orderStatus, paymentStatus, attemptStatus ], properties: { orderStatus: { type: string }, paymentStatus: { type: string }, attemptStatus: { type: string } } } } } }
+        '401': { $ref: '#/components/responses/Error' }
+        '404': { $ref: '#/components/responses/Error' }
+        '503': { $ref: '#/components/responses/Error' }
   /v1/orders/{id}/payment:
     get:
       tags: [ Orders ]
@@ -315,6 +329,39 @@ paths:
       parameters: [ { $ref: '#/components/parameters/Uuid' } ]
       responses:
         '200': { description: OK, content: { application/json: { schema: { $ref: '#/components/schemas/PaymentStatusView' } } } }
+  /v1/orders/{id}/payment-link:
+    post:
+      tags: [ Orders ]
+      operationId: createPaymentLink
+      description: |
+        For the mobile app, which cannot POST a form to the provider. Creates or resumes the order's single live payment attempt (same rules as `createPaymentAttempt`) and returns a short-lived (10 minutes) signed `url` to open in the system browser; that page forwards the customer to the provider's hosted checkout. When the customer returns, read the server-confirmed state from `GET /v1/orders/{id}/payment` (also on app resume); never infer success from the browser. If `APP_RETURN_URL` is configured the browser is sent to `<APP_RETURN_URL>?order=<id>&pay=paid|pending|failed`, otherwise it shows a "return to the app" page.
+      security: [ { bearerAuth: [] } ]
+      parameters: [ { $ref: '#/components/parameters/Uuid' } ]
+      responses:
+        '201': { description: Created, content: { application/json: { schema: { type: object, required: [ url, expiresAt, attempt ], properties: { url: { type: string, format: uri }, expiresAt: { type: string, format: date-time }, attempt: { $ref: '#/components/schemas/PaymentAttempt' } } } } } }
+        '409': { $ref: '#/components/responses/Error' }
+        '422': { $ref: '#/components/responses/Error' }
+  /v1/payments/{provider}/start:
+    get:
+      tags: [ Orders ]
+      operationId: paymentCheckoutStart
+      description: Browser page reached through the signed link from `createPaymentLink`; not called by app code. Verifies the token (HMAC, 10 minute expiry, names only the order) and renders a tiny page that auto-submits the hosted-checkout form built from our own data. 410 when the link expired or the order can no longer be paid.
+      parameters: [ { name: provider, in: path, required: true, schema: { type: string } }, { name: t, in: query, required: true, schema: { type: string } } ]
+      responses:
+        '200': { description: HTML page that forwards to the provider }
+        '404': { $ref: '#/components/responses/Error' }
+        '410': { description: Link expired or order not payable }
+  /v1/payments/{provider}/return:
+    post:
+      tags: [ Orders ]
+      operationId: paymentCheckoutReturn
+      description: |
+        Browser landing for hosted (redirect) checkout - not called by app code. The website posts the customer to the provider's hosted page with this URL as `callback_url`; the provider then POSTs the browser here as `application/x-www-form-urlencoded` (Razorpay: `razorpay_payment_id`, `razorpay_order_id`, `razorpay_signature`, or `error[...]` fields when the payment failed or was cancelled). No session is needed: the server verifies the signature, asks the provider for the order status itself, applies it idempotently and answers `303` to `STOREFRONT_ORIGIN/orders/{orderId}?pay=paid|pending|failed` (`&placed=1` when paid). The destination comes only from server configuration, never from the request. Always read the final state from `GET /v1/orders/{id}/payment`.
+      parameters: [ { name: provider, in: path, required: true, schema: { type: string } }, { name: c, in: query, required: false, schema: { type: string, enum: [ app ] }, description: 'Set by the app hand-off page: answer with the app deep link (or a close-this-tab page) instead of the website redirect.' } ]
+      requestBody: { required: true, content: { application/x-www-form-urlencoded: { schema: { type: object } } } }
+      responses:
+        '303': { description: Redirect back to the storefront order page }
+        '404': { $ref: '#/components/responses/Error' }
   /v1/webhooks/{provider}:
     post:
       tags: [ Webhooks ]
@@ -497,9 +544,9 @@ paths:
     post:
       tags: [ Auth ]
       operationId: deleteAccount
-      description: Erases personal data (login, profile, addresses, wishlist, devices, reviews). Orders and their address snapshots are retained for tax/accounting. Refused (409) while orders are in progress.
+      description: Erases personal data after reauthentication by password or a fresh single-use OTP bound to the signed-in account phone. Request a new code through the OTP request endpoint. Orders and their address snapshots are retained. Refused (409) while orders are in progress.
       security: [ { bearerAuth: [] } ]
-      requestBody: { required: true, content: { application/json: { schema: { type: object, required: [ password ], properties: { password: { type: string } } } } } }
+      requestBody: { required: true, content: { application/json: { schema: { oneOf: [ { type: object, required: [ password ], additionalProperties: false, properties: { password: { type: string, minLength: 1, maxLength: 128 } } }, { type: object, required: [ code ], additionalProperties: false, properties: { code: { type: string, pattern: '^[0-9]{6}$' } } } ] } } } }
       responses:
         '204': { description: Deleted }
         '409': { $ref: '#/components/responses/Error' }
@@ -5096,6 +5143,7 @@ components:
         codEnabled: { type: boolean }
         codMaxOrderPaise: { type: integer, nullable: true }
         codFeePaise: { type: integer, description: Added to every Cash-on-Delivery order }
+        onlinePaymentsEnabled: { type: boolean, description: 'True when customers can pay online (UPI, cards, netbanking). Offer the option only then; the quote request still decides with paymentMethod online.' }
         gstRateBps: { type: integer, description: 1800 = 18% }
         taxInclusive: { type: boolean }
         checkoutOpen: { type: boolean }
@@ -5132,6 +5180,7 @@ components:
         suitableSurfaces: { type: string, nullable: true }
         boxContents: { type: string, nullable: true }
         variant: { $ref: '#/components/schemas/Variant' }
+        variants: { type: array, description: All active variants in a stable order; variant is the in-stock default when available., items: { $ref: '#/components/schemas/Variant' } }
         media: { type: array, items: { $ref: '#/components/schemas/Media' } }
     ProductPage: { type: object, required: [ items, nextCursor ], properties: { items: { type: array, items: { $ref: '#/components/schemas/Product' } }, nextCursor: { type: string, nullable: true } } }
     Review: { type: object, required: [ id, rating, title, body, verifiedPurchase, createdAt ], properties: { photos: { type: array, items: { type: object, properties: { id: { type: string }, url: { type: string }, width: { type: integer }, height: { type: integer } } } }, id: { type: string }, rating: { type: integer, minimum: 1, maximum: 5 }, title: { type: string }, body: { type: string }, verifiedPurchase: { type: boolean }, createdAt: { type: string, format: date-time } } }
@@ -5193,6 +5242,7 @@ components:
       type: object
       required: [ variantId, productId, sku, productName, variantTitle, assetPath, unitPricePaise, quantity, lineTotalPaise ]
       properties:
+        orderItemId: { type: integer, minimum: 1, description: Immutable order line identifier used when requesting a return }
         variantId: { type: string }
         productId: { type: string }
         sku: { type: string }

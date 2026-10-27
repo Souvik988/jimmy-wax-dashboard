@@ -1,6 +1,6 @@
 # Backend contract pack (generated from the backend repo; deterministic - re-running with no source change produces no diff)
 
-- openapi.yaml: source of truth (v1.4.0, 234 operations)
+- openapi.yaml: source of truth (v1.6.0, 238 operations)
 - api-index.md: every operation with auth, permission and MFA (generated)
 - blocks.schema.json: field-level JSON Schemas for all Studio blocks, the page/tokens/navigation/chrome documents and per-slot image requirements `x-slot` (generated)
 - doc-schemas.json: design system / token overrides / navigation / chrome JSON Schemas (generated from the backend validators)

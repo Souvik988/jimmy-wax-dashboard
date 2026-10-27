@@ -1,0 +1,58 @@
+{
+  "updated": "2026-10-25",
+  "state": "implementation_complete_pending_owner_activation",
+  "scope": "Four local projects; production code and isolated verification only. No production service, customer data, payment, SMS, email, or shipping provider was changed.",
+  "contract": {
+    "version": "1.6.0",
+    "sha256": "54c94cbcb6db670d06b11bb0fc59a94e6bd8a41d083ea3b86b6525337ed3c8a9",
+    "copiesVerified": 5
+  },
+  "shiprocket": {
+    "state": "prepared_not_activated",
+    "liveActivation": "Deferred by the user until credentials are supplied",
+    "ready": [
+      "Dedicated API-user or bearer-token configuration, refresh handling, readiness read, forward shipping, webhook secret, and unit conversion validation are implemented.",
+      "Reverse-return adapter is prepared; return approval never auto-books a pickup, and dashboard physical receipt/restock plus manual COD reconciliation are explicit."
+    ],
+    "ownerGates": [
+      "Shiprocket API credentials, registered pickup/return addresses, wallet and sandbox/live controlled acceptance"
+    ]
+  },
+  "stages": [
+    {
+      "id": "foundation",
+      "status": "complete",
+      "work": "Dependencies upgraded, production audits clean, real typecheck gate, contract synchronization, environment templates, CI guards, and secret/artifact ignores."
+    },
+    {
+      "id": "catalog",
+      "status": "complete",
+      "work": "Variant-aware read model, media policy, category/collection routes, cursor pagination, app cart identity, and product detail selection."
+    },
+    {
+      "id": "customer",
+      "status": "complete",
+      "work": "Account self-service, immutable order details, tracking, cancellation/returns/invoices, policies, inbox/preferences, verified reviews, and clear refund/receipt operations."
+    },
+    {
+      "id": "providers",
+      "status": "complete_pending_credentials",
+      "work": "SMS, email/storage/payment/shipping provider configuration and fail-safe adapters are implemented; live-provider acceptance remains an owner operation."
+    },
+    {
+      "id": "verification",
+      "status": "complete_local",
+      "work": "Dashboard verify, backend unit/integration, website unit/browser, Flutter analysis/tests/debug APK, isolated restore drill, contract release check, and production dependency audits pass."
+    }
+  ],
+  "evidence": "docs/build/evidence/production-readiness-2026-10-25",
+  "deploymentCertified": false,
+  "ownerActivationRequired": [
+    "Deploy exact HTTPS origins and private secrets through the host secret manager; then run backend preflight against managed PostgreSQL, S3 and SMTP.",
+    "Supply legal policy, GST, support-contact, return-window, domains/DNS, monitoring and backup-retention decisions.",
+    "Complete Razorpay test/live controlled payments and refunds, Twilio sender approval and real-device OTP acceptance.",
+    "Supply Shiprocket credentials and complete the controlled forward and reverse provider acceptance defined in docs/build/SHIPROCKET_ACTIVATION.txt.",
+    "Provide Android release signing/Play credentials and iOS signing/team/Mac plus real-device release acceptance.",
+    "Establish reviewed remote Git baselines for the currently local backend, website and app sources; local secret and generated-artifact ignores are in place but no source was pushed."
+  ]
+}

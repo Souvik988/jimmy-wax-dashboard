@@ -1,0 +1,38 @@
+{
+  "checkedAt": "2026-10-25T12:04:22.708Z",
+  "success": true,
+  "checks": [
+    {
+      "project": "backend",
+      "path": "C:\\Users\\MSI\\OneDrive\\Desktop\\jimmy&wax_backend\\contracts\\api\\openapi.yaml",
+      "exists": true,
+      "sha256": "54c94cbcb6db670d06b11bb0fc59a94e6bd8a41d083ea3b86b6525337ed3c8a9"
+    },
+    {
+      "project": "pack",
+      "path": "C:\\Users\\MSI\\OneDrive\\Desktop\\jimmy&wax_backend\\contracts\\pack\\openapi.yaml",
+      "exists": true,
+      "sha256": "54c94cbcb6db670d06b11bb0fc59a94e6bd8a41d083ea3b86b6525337ed3c8a9"
+    },
+    {
+      "project": "dashboard",
+      "path": "C:\\Users\\MSI\\OneDrive\\Desktop\\jimmy&wax_dashboard\\docs\\backend-contract\\openapi.yaml",
+      "exists": true,
+      "sha256": "54c94cbcb6db670d06b11bb0fc59a94e6bd8a41d083ea3b86b6525337ed3c8a9"
+    },
+    {
+      "project": "website",
+      "path": "C:\\Users\\MSI\\OneDrive\\Desktop\\jimmy_nd _wax_website\\contracts\\api\\openapi.yaml",
+      "exists": true,
+      "sha256": "54c94cbcb6db670d06b11bb0fc59a94e6bd8a41d083ea3b86b6525337ed3c8a9"
+    },
+    {
+      "project": "app",
+      "path": "C:\\Users\\MSI\\OneDrive\\Desktop\\jimmy&wax_app\\contracts\\api\\openapi.yaml",
+      "exists": true,
+      "sha256": "54c94cbcb6db670d06b11bb0fc59a94e6bd8a41d083ea3b86b6525337ed3c8a9"
+    }
+  ],
+  "shiprocket": "Live activation deferred until owner credentials and provider acceptance",
+  "deploymentCertified": false
+}

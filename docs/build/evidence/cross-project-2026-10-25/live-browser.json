@@ -1,0 +1,406 @@
+{
+  "dashboardRoutes": [
+    {
+      "route": "/",
+      "status": 200,
+      "url": "/",
+      "serverErrors": [],
+      "hasMain": 1,
+      "visibleAlerts": [
+        ""
+      ]
+    },
+    {
+      "route": "/orders",
+      "status": 200,
+      "url": "/orders",
+      "serverErrors": [],
+      "hasMain": 1,
+      "visibleAlerts": [
+        ""
+      ]
+    },
+    {
+      "route": "/products",
+      "status": 200,
+      "url": "/products",
+      "serverErrors": [],
+      "hasMain": 1,
+      "visibleAlerts": [
+        ""
+      ]
+    },
+    {
+      "route": "/products/new",
+      "status": 200,
+      "url": "/products/new",
+      "serverErrors": [],
+      "hasMain": 1,
+      "visibleAlerts": [
+        ""
+      ]
+    },
+    {
+      "route": "/products/twinkle-shine-leather-polish",
+      "status": 200,
+      "url": "/products/twinkle-shine-leather-polish",
+      "serverErrors": [],
+      "hasMain": 1,
+      "visibleAlerts": [
+        "The same image is listed twice.",
+        ""
+      ]
+    },
+    {
+      "route": "/catalogue",
+      "status": 200,
+      "url": "/catalogue",
+      "serverErrors": [],
+      "hasMain": 1,
+      "visibleAlerts": [
+        ""
+      ]
+    },
+    {
+      "route": "/inventory",
+      "status": 200,
+      "url": "/inventory",
+      "serverErrors": [],
+      "hasMain": 1,
+      "visibleAlerts": [
+        ""
+      ]
+    },
+    {
+      "route": "/media",
+      "status": 200,
+      "url": "/media",
+      "serverErrors": [],
+      "hasMain": 1,
+      "visibleAlerts": [
+        ""
+      ]
+    },
+    {
+      "route": "/shipping",
+      "status": 200,
+      "url": "/shipping",
+      "serverErrors": [],
+      "hasMain": 1,
+      "visibleAlerts": [
+        ""
+      ]
+    },
+    {
+      "route": "/shipping/shipments",
+      "status": 200,
+      "url": "/shipping/shipments",
+      "serverErrors": [],
+      "hasMain": 2,
+      "visibleAlerts": [
+        ""
+      ]
+    },
+    {
+      "route": "/shipping/returns",
+      "status": 200,
+      "url": "/shipping/returns",
+      "serverErrors": [],
+      "hasMain": 2,
+      "visibleAlerts": [
+        ""
+      ]
+    },
+    {
+      "route": "/studio",
+      "status": 200,
+      "url": "/studio",
+      "serverErrors": [],
+      "hasMain": 1,
+      "visibleAlerts": [
+        ""
+      ]
+    },
+    {
+      "route": "/studio/releases",
+      "status": 200,
+      "url": "/studio/releases",
+      "serverErrors": [],
+      "hasMain": 1,
+      "visibleAlerts": [
+        ""
+      ]
+    },
+    {
+      "route": "/studio/campaigns",
+      "status": 200,
+      "url": "/studio/campaigns",
+      "serverErrors": [],
+      "hasMain": 1,
+      "visibleAlerts": [
+        ""
+      ]
+    },
+    {
+      "route": "/studio/library/care-guides",
+      "status": 200,
+      "url": "/studio/library/care-guides",
+      "serverErrors": [],
+      "hasMain": 1,
+      "visibleAlerts": [
+        ""
+      ]
+    },
+    {
+      "route": "/studio/library/stories",
+      "status": 200,
+      "url": "/studio/library/stories",
+      "serverErrors": [],
+      "hasMain": 1,
+      "visibleAlerts": [
+        ""
+      ]
+    },
+    {
+      "route": "/studio/library/journal",
+      "status": 200,
+      "url": "/studio/library/journal",
+      "serverErrors": [],
+      "hasMain": 1,
+      "visibleAlerts": [
+        ""
+      ]
+    },
+    {
+      "route": "/studio/library/testimonials",
+      "status": 200,
+      "url": "/studio/library/testimonials",
+      "serverErrors": [],
+      "hasMain": 1,
+      "visibleAlerts": [
+        ""
+      ]
+    },
+    {
+      "route": "/studio/library/faq-groups",
+      "status": 200,
+      "url": "/studio/library/faq-groups",
+      "serverErrors": [],
+      "hasMain": 1,
+      "visibleAlerts": [
+        ""
+      ]
+    },
+    {
+      "route": "/studio/library/announcements",
+      "status": 200,
+      "url": "/studio/library/announcements",
+      "serverErrors": [],
+      "hasMain": 1,
+      "visibleAlerts": [
+        ""
+      ]
+    },
+    {
+      "route": "/studio/doc/shared/tokens/base",
+      "status": 200,
+      "url": "/studio/doc/shared/tokens/base",
+      "serverErrors": [],
+      "hasMain": 1,
+      "visibleAlerts": [
+        ""
+      ]
+    },
+    {
+      "route": "/studio/doc/web/navigation/main",
+      "status": 200,
+      "url": "/studio/doc/web/navigation/main",
+      "serverErrors": [],
+      "hasMain": 1,
+      "visibleAlerts": [
+        ""
+      ]
+    },
+    {
+      "route": "/studio/doc/web/chrome/main",
+      "status": 200,
+      "url": "/studio/doc/web/chrome/main",
+      "serverErrors": [],
+      "hasMain": 1,
+      "visibleAlerts": [
+        ""
+      ]
+    },
+    {
+      "route": "/studio/doc/web/page/home",
+      "status": 200,
+      "url": "/studio/doc/web/page/home",
+      "serverErrors": [],
+      "hasMain": 1,
+      "visibleAlerts": [
+        ""
+      ]
+    },
+    {
+      "route": "/customers",
+      "status": 200,
+      "url": "/customers",
+      "serverErrors": [],
+      "hasMain": 1,
+      "visibleAlerts": [
+        ""
+      ]
+    },
+    {
+      "route": "/reviews",
+      "status": 200,
+      "url": "/reviews",
+      "serverErrors": [],
+      "hasMain": 1,
+      "visibleAlerts": [
+        ""
+      ]
+    },
+    {
+      "route": "/coupons",
+      "status": 200,
+      "url": "/coupons",
+      "serverErrors": [],
+      "hasMain": 1,
+      "visibleAlerts": [
+        ""
+      ]
+    },
+    {
+      "route": "/messaging",
+      "status": 200,
+      "url": "/messaging",
+      "serverErrors": [],
+      "hasMain": 1,
+      "visibleAlerts": [
+        ""
+      ]
+    },
+    {
+      "route": "/analytics",
+      "status": 200,
+      "url": "/analytics",
+      "serverErrors": [],
+      "hasMain": 1,
+      "visibleAlerts": [
+        ""
+      ]
+    },
+    {
+      "route": "/finance",
+      "status": 200,
+      "url": "/finance",
+      "serverErrors": [],
+      "hasMain": 1,
+      "visibleAlerts": [
+        ""
+      ]
+    },
+    {
+      "route": "/audit",
+      "status": 200,
+      "url": "/audit",
+      "serverErrors": [],
+      "hasMain": 1,
+      "visibleAlerts": [
+        ""
+      ]
+    },
+    {
+      "route": "/ops",
+      "status": 200,
+      "url": "/ops",
+      "serverErrors": [],
+      "hasMain": 1,
+      "visibleAlerts": [
+        ""
+      ]
+    },
+    {
+      "route": "/settings",
+      "status": 200,
+      "url": "/settings",
+      "serverErrors": [],
+      "hasMain": 1,
+      "visibleAlerts": [
+        ""
+      ]
+    },
+    {
+      "route": "/settings/team",
+      "status": 200,
+      "url": "/settings/team",
+      "serverErrors": [],
+      "hasMain": 1,
+      "visibleAlerts": [
+        ""
+      ]
+    },
+    {
+      "route": "/settings/integrations",
+      "status": 200,
+      "url": "/settings/integrations",
+      "serverErrors": [],
+      "hasMain": 1,
+      "visibleAlerts": [
+        ""
+      ]
+    },
+    {
+      "route": "/settings/platform",
+      "status": 200,
+      "url": "/settings/platform",
+      "serverErrors": [],
+      "hasMain": 1,
+      "visibleAlerts": [
+        ""
+      ]
+    },
+    {
+      "route": "/settings/policies",
+      "status": 200,
+      "url": "/settings/policies",
+      "serverErrors": [],
+      "hasMain": 1,
+      "visibleAlerts": [
+        ""
+      ]
+    },
+    {
+      "route": "/account/security",
+      "status": 200,
+      "url": "/account/security",
+      "serverErrors": [],
+      "hasMain": 1,
+      "visibleAlerts": [
+        ""
+      ]
+    }
+  ],
+  "failures": [],
+  "flows": [
+    "Browser sign-in, MFA enrollment, recovery-code acknowledgement, encrypted session",
+    "Dashboard BFF draft save -> backend validation -> publish -> real website renders change -> rollback -> website restores baseline",
+    "38 signed-in dashboard routes against the real isolated backend"
+  ],
+  "consoleErrors": [],
+  "sessionSecurity": [
+    {
+      "name": "jw_csrf",
+      "httpOnly": false,
+      "secure": true,
+      "sameSite": "Strict"
+    },
+    {
+      "name": "jw_operator_session",
+      "httpOnly": true,
+      "secure": true,
+      "sameSite": "Strict"
+    }
+  ]
+}

@@ -50,7 +50,7 @@ export function walletShortfallPaise(walletBalancePaise: number | null, courier:
 /** Ordered checklist for whoever connects the real provider. Backend-side only; the dashboard needs no code change. */
 export const PROVIDER_SETUP_STEPS: ReadonlyArray<{ title: string; detail: string }> = [
   { title: 'Create a Shiprocket API user', detail: 'A dedicated API user (not your login) with access to orders, couriers, labels and pickups.' },
-  { title: 'Set the backend environment', detail: 'SHIPPING_PROVIDER=shiprocket, SHIPROCKET_EMAIL, SHIPROCKET_PASSWORD, SHIPROCKET_WEBHOOK_TOKEN (and SHIPROCKET_BASE_URL only if instructed). Keep these in the secret manager; the dashboard never shows or stores them.' },
+  { title: 'Set the backend environment', detail: 'When ready, set SHIPPING_PROVIDER=shiprocket and SHIPROCKET_WEBHOOK_TOKEN, with either a dedicated SHIPROCKET_EMAIL / SHIPROCKET_PASSWORD pair or SHIPROCKET_API_TOKEN. API-user credentials support automatic token refresh. Keep secrets in the commerce and worker environments; the dashboard never stores them.' },
   { title: 'Register the tracking webhook', detail: 'Point Shiprocket’s webhook at the backend with the same token so shipment status updates arrive automatically.' },
   { title: 'Restart the commerce API and workers', detail: 'The Shipping centre then shows “Provider reachable” and the dispatch controls appear on ready orders.' },
   { title: 'Set the pickup location and PIN', detail: 'Use the Shipping settings panel. The location must match one registered in Shiprocket.' },

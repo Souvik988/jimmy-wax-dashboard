@@ -61,5 +61,5 @@ See `contracts/api/CHANGELOG.md`. The breaking ones: issuing an invoice is `POST
 
 ## Not connected yet (honest list)
 * **Studio rendering** is live in the website adapter and fetched by the app; the app's `HomeScreen` still needs to draw the published bundle (see the app repo).
-* **Online payments** (Razorpay) and **SMS** are not configured; both clients offer Cash on Delivery and email/demo sign-in only. The webhook and refund paths are implemented and tested but have never run against the provider.
+* **Online payments** (Razorpay): built into the website (hosted-checkout redirect) and the app (signed link in the system browser); verified against Razorpay's test API up to the hosted page, not yet with a completed test payment or a real webhook (runbook section 10). Both clients show "Pay online" only when `GET /v1/store-settings` says `onlinePaymentsEnabled`. **SMS** is not configured; email/demo sign-in only. The refund path has never run against the provider.
 * **Shiprocket** is mock-tested only; run the sandbox checklist in `docs/build/PRODUCTION_RUNBOOK.md` before setting `SHIPPING_PROVIDER=shiprocket`.

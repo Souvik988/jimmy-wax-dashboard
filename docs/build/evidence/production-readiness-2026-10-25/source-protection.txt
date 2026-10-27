@@ -1,0 +1,11 @@
+Source-protection check, 2026-10-25
+
+Sensitive local configuration files were found only in ignored locations:
+* backend/backend/.env is ignored by backend/.gitignore.
+* website/.env.development is ignored by website/.gitignore.
+* app/.env.local.json is ignored by app/.gitignore.
+
+The Flutter source ignore rules were extended to exclude /artifacts/ and *.hprof.
+This prevents generated APKs, visual QA captures, and a Java heap dump from entering a source baseline.
+
+The dashboard has an existing remote. The backend, website and app currently have local Git repositories but no committed remote baseline; no source was pushed or published during this work. The owner must establish reviewed private remotes and make the initial commits after reviewing the project assets.

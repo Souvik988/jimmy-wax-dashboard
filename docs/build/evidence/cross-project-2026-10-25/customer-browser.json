@@ -1,0 +1,11 @@
+{
+  "checks": [
+    "Real website guest cart -> demo OTP sign-in -> account cart merge",
+    "Website delivery address -> serviceability -> server quote -> COD order -> customer order detail",
+    "Same customer-created order is readable through the real admin API used by the dashboard",
+    "Customer session survives browser reload and the same order renders"
+  ],
+  "errors": [],
+  "orderId": "ab2d9cbf-c4dd-4cf5-a396-87dfa09e00bf",
+  "adminOrderStatus": "placed"
+}

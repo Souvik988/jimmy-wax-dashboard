@@ -1,5 +1,12 @@
 # Contract changelog
 
+## 1.6.0 - 2026-10-25
+
+- Product reads now carry all active `variants` within one product. Pagination counts products once; clients select the stable variant ID and its integer price/stock before adding it to the cart.
+- Historical order lines include `orderItemId` so customers can request returns against immutable purchased quantities.
+- Account deletion accepts either the existing password proof or a fresh six-digit OTP for the authenticated account's bound phone number. Failed OTP attempts remain rate-limited and persisted.
+- Dashboard, website and Flutter snapshots are pinned to the same canonical OpenAPI hash. Real provider and device acceptance remain release gates.
+
 ## 1.0.0-draft.1 — 2026-10-02
 Initial draft: experience reads, guest/customer cart, addresses, wishlist, quotes, orders (idempotent), payment attempts/status, cancel, webhooks, admin surface (loosely typed). 50 operations, parity with `commerce-api` + `experience-api` enforced by `scripts/contract-check.ts`.
 
@@ -55,3 +62,14 @@ Contract hygiene plus the hardening the dashboard asked for (DASH-BR-001..050; t
 - Product, category, collection and variant admin path parameters are slugs (`#/components/parameters/Slug`), not UUIDs. (DASH-BR-027, -030)
 - Documented: invite accept (201 `{ email, role }`, no session), MFA recovery codes (8), order CSV export, order list parameters, checkout disable (not MFA-gated), CSV import (`text/csv`, 200/422 `ImportReport`), catalogue export bounds, catalogue cache TTL, admin overview schemas, `GET /v1/app/version-check`.
 - Operational: `/metrics` needs `METRICS_TOKEN` (404 in production without it); production configuration fails fast on unsafe values; S3-compatible storage; migration ledger.
+
+## 1.5.0 - 2026-10-13
+Online payments (Razorpay, tested against Razorpay's TEST API). 238 operations. **Additive: no existing operation changed**, so clients that only offer Cash on Delivery need no change.
+
+- `GET /v1/store-settings` (and the home bootstrap `store`) now carries `onlinePaymentsEnabled`. Offer "Pay online" only when it is true.
+- Website flow (no third-party script on the storefront origin): create the order with a quote made with `paymentMethod: online`, call `POST /v1/orders/{id}/payment-attempts` (now also returns `keyId` when resuming), POST a form to the provider's hosted checkout with `callback_url = <api>/v1/payments/razorpay/return`; the provider posts the browser back there and the API answers `303` to `<website>/orders/{id}?pay=paid|pending|failed` (`&placed=1` when paid).
+- `POST /v1/payments/{provider}/return` (browser landing, provider-only) and `GET /v1/payments/{provider}/start` (signed hand-off page for the app).
+- `POST /v1/orders/{id}/payment-link` - for the mobile app: returns a 10 minute signed `url` that forwards to the hosted checkout.
+- `POST /v1/orders/{id}/payment-attempts/confirm` - for SDK callbacks: `{ providerOrderId, providerPaymentId, signature }`; verified server-side and cross-checked with the provider; returns `{ orderStatus, paymentStatus, attemptStatus }`.
+- In every flow the client reads the final state from `GET /v1/orders/{id}/payment`; success is never inferred from a redirect or SDK callback.
+- New configuration: `STOREFRONT_ORIGIN` (required with online payments in production, https), `PUBLIC_API_ORIGIN`, `APP_RETURN_URL` (optional deep link), plus the existing `RAZORPAY_KEY_ID` / `RAZORPAY_KEY_SECRET` / `RAZORPAY_WEBHOOK_SECRET`.

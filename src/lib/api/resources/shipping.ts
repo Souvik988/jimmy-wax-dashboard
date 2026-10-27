@@ -391,6 +391,12 @@ export async function decideReturn(returnId: string, input: ReturnDecisionInput)
   await apiPost<null>(`admin/returns/${id}/decide`, returnDecisionInputSchema.parse(input));
 }
 
+export async function receiveReturn(returnId: string) {
+  const id = returnIdSchema.parse(returnId);
+  return z.object({ id: z.string().uuid(), status: z.literal('received'), refundValuePaise: paise, refundQueued: z.boolean(), manualRefundRequired: z.boolean() })
+    .parse(await apiPost<unknown>(`admin/returns/${id}/receive`, {}));
+}
+
 /**
  * Sends a refund to the payment gateway. Needs `refunds:write` and a verified (MFA) session; safe to retry because the gateway call uses the
  * refund's own idempotency key, an already-processed refund answers `processed`, and a gateway failure leaves it `failed` so it can be retried.

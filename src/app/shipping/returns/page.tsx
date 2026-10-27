@@ -13,6 +13,7 @@ export default async function ReturnsPage(): Promise<React.ReactNode> {
   return <AppShell breadcrumbs={['Orders & Fulfilment', 'Shipping centre', 'Returns & refunds']}>
     <ReturnsRefunds
       canDecideReturns={can(operator, 'orders:fulfil')}
+      canReceiveReturns={can(operator, 'orders:fulfil') && can(operator, 'inventory:write')}
       canViewRefunds={can(operator, 'payments:read')}
       canProcessRefunds={can(operator, 'refunds:write')}
       canViewReturnPolicy={can(operator, 'settings:read')}

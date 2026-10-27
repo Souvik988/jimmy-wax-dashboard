@@ -1,0 +1,39 @@
+JIMMY & WAX — PRODUCTION IMPLEMENTATION HANDOFF
+Date: 2026-10-25
+
+Outcome
+-------
+The implementation work identified by CROSS_PROJECT_AUDIT_2026-10-25.txt is complete locally across the dashboard, backend, website and Flutter app. The projects share OpenAPI contract 1.6.0, SHA-256 54c94cbcb6db670d06b11bb0fc59a94e6bd8a41d083ea3b86b6525337ed3c8a9. The release contract check verifies all five copies (backend canonical, backend pack, dashboard, website and app).
+
+What changed
+------------
+* Catalog is variant-safe end to end: primary in-stock variant selection, variant media/price/stock, variant-specific web and app carts, category/collection routing and bounded cursor pagination.
+* Customer workflows now cover account/profile/contact preferences, address book, wishlist, inbox, data export, account deletion with password or fresh bound-phone OTP, recovery and email verification, published policies, immutable invoices/orders, tracking, cancellation, return requests and verified-purchase reviews.
+* The dashboard now has an explicit physical-return receipt action. It requires confirmation, restocks once, communicates the difference between queued prepaid refunds and manual COD reconciliation, and does not automatically replay a failed write.
+* SMS, mail, storage, payment and shipping configuration are service-role-aware. Real provider secrets are never delivered to the public experience API.
+* Shiprocket is prepared but intentionally OFF. The adapter supports API-user login or bearer token, safe refresh, read-only readiness, forward-shipment safety and the documented reverse-return payload. Approval never auto-books a reverse pickup; manual coordination remains the fallback until a controlled provider acceptance passes.
+* Dependencies were updated and production dependency audits are clean. Production config rejects unsafe local/place-holder origins. `.env`, signing material, Flutter memory dumps and generated app artifacts are excluded from source control.
+* Flutter is restored and has a reusable Windows build wrapper that handles the `&` in the original project path without changing the source folder.
+
+Verification performed
+----------------------
+* Dashboard: contract, TypeScript, ESLint, 399 tests in 69 files, and Next production build passed.
+* Backend: all 11 workspace TypeScript projects, formatting, 79 unit tests and 209 isolated PostgreSQL integration tests passed. A deliberately introduced type error made the type gate fail, then was removed.
+* Website: contract, release-origin preflight, 70 unit tests, Vite production build, and 8 Chromium browser tests passed.
+* App: `flutter analyze` passed; 236 tests passed with one intentional skip; a debug Android APK was built successfully using the normal wrapper command.
+* Production-only package audits for dashboard, backend and website report zero vulnerabilities.
+* A separate PostgreSQL backup/restore drill passed all 13 invariant checks. Local browser smoke coverage also exercised login, guest-cart merge, COD order, profile/preferences, policies, invoice, delivery tracking, return selection and review moderation against the isolated backend.
+
+Raw logs and machine-readable audit outputs are in:
+docs/build/evidence/production-readiness-2026-10-25
+
+Owner activation gates (not code defects)
+-----------------------------------------
+1. Deploy the four projects to their real HTTPS origins and configure secrets in the hosting provider. Run the backend production preflight against managed Postgres, object storage and SMTP.
+2. Confirm legal policy/GST/support/return-window content, DNS, monitoring, managed backup/PITR and source-repository remote baselines.
+3. Run controlled real-provider acceptance for Razorpay, Twilio and Shiprocket. Shiprocket details are in the backend `docs/build/SHIPROCKET_ACTIVATION.txt`; credentials were deliberately not requested or stored here.
+4. Provide Android release signing/Play access, iOS signing/team/Mac, and run physical-device release acceptance.
+
+Explicitly deferred product decisions
+-------------------------------------
+Push/marketing automation and automatic reverse-pickup booking were not activated because they need separate consent, provider credentials and operational policy. The current return flow is safe: a customer request is approved, staff physically receive/restock it once, finance queues eligible prepaid refunds, and COD refunds remain manual and auditable.
